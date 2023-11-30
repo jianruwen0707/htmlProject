@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#FFF"
+    android:orientation="vertical">
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/main"
+        android:padding="12dp"
+        android:paddingBottom="0dp"
+        android:text="选择USB设备"
+        android:textColor="#FFF"
+        android:textSize="18sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/main"
+        android:clickable="true"
+        android:paddingLeft="36px"
+        android:paddingBottom="24px"
+        android:text="搜不到打印机、打印机初始化等问题请咨询客服！"
+        android:textColor="#FFF"
+        android:textSize="12sp" />
+
+    <!--<ScrollView-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content">-->
+
+
+    <ListView
+        android:id="@+id/lvDevice"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@color/darkgrey"
+        android:dividerHeight="1dp" />
+
+    <!--<View-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="1dp"-->
+    <!--android:background="@color/lightgrey" />-->
+
+    <!--<ListView-->
+        <!--android:id="@+id/lvNewDevices"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:divider="@color/lightgrey"-->
+        <!--android:dividerHeight="1dp" />-->
+
+
+    <!--<View-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="1dp"-->
+    <!--android:background="@color/lightgrey" />-->
+<!--    <FrameLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:background="@color/main">-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/btBluetoothScan"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:clickable="true"-->
+<!--            android:padding="16dp"-->
+<!--            android:text="搜索未配对设备"-->
+<!--            android:textColor="#fff"-->
+<!--            android:textAlignment="center"-->
+<!--            android:textSize="16sp" />-->
+
+<!--        <ProgressBar-->
+<!--            android:id="@+id/pb_dialog_choose_bluetooth_device_progress_bar"-->
+<!--            style="@android:style/Widget.ProgressBar.Small"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_gravity="right|center_vertical"-->
+<!--            android:layout_marginRight="16dp"-->
+<!--            android:visibility="gone" />-->
+
+<!--    </FrameLayout>-->
+
+    <!--</ScrollView>-->
+</LinearLayout>

@@ -1,0 +1,5 @@
+include ':app-core'
+include ':autoupdate'
+include ':aikuaixiao_shouyin'
+include ':aikuaixiao_qingshangtv'
+include ':aikuaixiaotv'
