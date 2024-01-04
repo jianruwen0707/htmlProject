@@ -89,8 +89,6 @@ public class MainActivity extends Activity {
             tipsNoNet(this);
         }
 
-
-
         //获得控件
         webView = (BridgeWebView) findViewById(R.id.wv_web_view);
         // 清缓存和记录，缓存引起的白屏
