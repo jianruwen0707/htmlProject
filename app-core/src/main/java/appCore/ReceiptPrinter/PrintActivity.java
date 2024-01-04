@@ -64,6 +64,7 @@ public class PrintActivity extends Activity {
 //        判读usb是否连接成功
         if (!UsbActivity.ISCONNECT) {
 //            Toast.makeText(mContext,getString(R.string.connect_first), Toast.LENGTH_SHORT).show();
+            System.out.println("打印机连接失败");
             return;
         }
 
@@ -74,6 +75,7 @@ public class PrintActivity extends Activity {
                 NativeBridge.myBinder.WriteSendData(new TaskCallback() {
                     @Override
                     public void OnSucceed() {
+                        System.out.println("打印机搜索");
 //                        Toast.makeText(getApplicationContext(),getString(R.string.con_success), Toast.LENGTH_SHORT).show();
 
                     }

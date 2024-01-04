@@ -15,7 +15,6 @@ public class UpdateBackgroundActivity extends RootActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        System.out.println("自动更新9");
         getWindow().setGravity(Gravity.LEFT | Gravity.TOP);
         WindowManager.LayoutParams attributes = getWindow().getAttributes();
         attributes.x = 0;

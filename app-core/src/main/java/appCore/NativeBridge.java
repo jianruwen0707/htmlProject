@@ -1,5 +1,6 @@
 package appCore;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -10,9 +11,11 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.Gravity;
 import android.webkit.JavascriptInterface;
@@ -37,10 +40,15 @@ import java.util.Iterator;
 import java.util.List;
 
 import appCore.ReceiptPrinter.PrintActivity;
+import appCore.ReceiptPrinter.SunmiPrintActivity;
 import appCore.UsbModule.SerialPortActivity;
 import appCore.UsbModule.UsbActivity;
 import appCore.autoUpdateApk.AutoUpdateApp;
+import appCore.blueTooth.BlueToothActivity;
 import appCore.common.ActivityPoolManager;
+import appCore.common.SpeechUtils;
+import appCore.presenter.ScalePresenter;
+import appCore.utils.SunmiPrintHelper;
 
 
 public class NativeBridge extends Activity {
@@ -86,7 +94,6 @@ public class NativeBridge extends Activity {
 
     @JavascriptInterface
     public void showDialog(String content, String title, String jsonObjectString, final String callback) {
-        System.out.println("调试222");
 
         Gson gson = new Gson();
         Alert alertInfo = gson.fromJson(jsonObjectString, Alert.class);
@@ -174,7 +181,6 @@ public class NativeBridge extends Activity {
         Toast makeText = Toast.makeText(context, msg, Toast.LENGTH_SHORT);
         makeText.setGravity(Gravity.CENTER, 0, 0);
         makeText.show();
-        System.out.println("调试");
 
     }
 
@@ -183,7 +189,7 @@ public class NativeBridge extends Activity {
         System.out.println("app监听关闭app222");
         mainActivity.finish();
         android.os.Process.killProcess(android.os.Process.myPid()); // 杀死进程
-//        ActivityPoolManager.exitClient();
+        ActivityPoolManager.exitClient();
     }
 
 
@@ -192,7 +198,7 @@ public class NativeBridge extends Activity {
 
         SerialPortActivity serialPort = new SerialPortActivity();
         serialPort.initAction(webView);
-
+        initAction();
 
     }
 
@@ -217,8 +223,6 @@ public class NativeBridge extends Activity {
     @JavascriptInterface
     public void initUsbPrinter() {
 
-
-
 //        初始化usd
         Intent intent = new Intent(context, PosprinterService.class);
         context.bindService(intent, mSerconnection, BIND_AUTO_CREATE);
@@ -228,13 +232,43 @@ public class NativeBridge extends Activity {
         context.startActivity(usbIntent);
 
 
+
     }
 
 
     @JavascriptInterface
-    public void printData(String printlist) {
-        PrintActivity printActivity = new PrintActivity(context);
-        printActivity.printData(printlist);
+    public void printData(String printlist) throws RemoteException {
+
+
+        if(SunmiPrintHelper.getInstance().sunmiPrinter ==2){
+            System.out.println("内置打印机");
+            SunmiPrintActivity sunmiPrintActivity = new SunmiPrintActivity(context);
+            sunmiPrintActivity.printData(printlist);
+        }else{
+            System.out.println("外接打印机");
+            PrintActivity printActivity = new PrintActivity(context);
+            printActivity.printData(printlist);
+        }
+
+
+    }
+
+
+
+    @JavascriptInterface
+    public void initBuleTooth() {
+        //        android 12 蓝牙新特性
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            //检查权限
+            if (!checkPermissions()) {
+                return;
+            }
+
+        }
+
+        Intent bluetoothIntent = new Intent(context, BlueToothActivity.class);
+        context.startActivity(bluetoothIntent);
+        BlueToothActivity.mwebView=webView;
 
 
     }
@@ -284,13 +318,83 @@ public class NativeBridge extends Activity {
 
     }
 
+    @JavascriptInterface
+    public void speakText(String text) {
+        SpeechUtils.getInstance(context).speakText(text);//app启动时 先在Application调用一下
+
+    }
+
 
 
     @JavascriptInterface
     public void closeApp() {
 //        System.out.println("app监听关闭app");
-//        ActivityPoolManager.exitClient();
+        ActivityPoolManager.exitClient();
     }
+
+
+
+    private ScalePresenter scalePresenter;
+    private void initAction() {
+        scalePresenter = new ScalePresenter(context, new ScalePresenter.ScalePresenterCallback() {
+            @Override
+            public void getData(final int net, final int pnet, final int statu) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+//                        updateScaleInfo(net, pnet, statu);
+//                        System.out.println("更新电子秤信息"+"net："+net);
+//                        System.out.println("更新电子秤信息"+"pnet："+pnet);
+//                        System.out.println("更新电子秤信息"+"statu："+statu);
+
+                        Handler handler = new Handler(Looper.getMainLooper());
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                webView.loadUrl("javascript:$getWeight('" + net + "')");
+                            }
+                        });
+
+                    }
+                });
+            }
+
+            @Override
+            public void isScaleCanUse(boolean isCan) {
+                if (!isCan) {
+                    System.out.println("可以使用电子秤");
+
+                }
+            }
+        });
+
+    }
+
+
+
+
+
+    // 需要进行检测的权限数组
+    protected String[] permissions = {
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.BLUETOOTH_ADVERTISE,
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+
+    };
+
+    private Boolean checkPermissions() {
+        AllowPermissions allowPermissions = new AllowPermissions();
+        Boolean isAllow = allowPermissions.checkPermissions((Activity)context, permissions);
+        if(!isAllow) {
+            Toast.makeText(getApplicationContext(), "很遗憾你把蓝牙可被检测权限禁用。请开启蓝牙可被检测权限，并重新进入", Toast.LENGTH_SHORT).show();
+          }
+        return isAllow;
+    }
+
+
+
 
 
 

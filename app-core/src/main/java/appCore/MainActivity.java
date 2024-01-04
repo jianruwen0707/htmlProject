@@ -20,7 +20,11 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
+import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -48,7 +52,14 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import appCore.UsbModule.SerialPortActivity;
 import appCore.common.ActivityPoolManager;
+import appCore.common.SpeechUtils;
+import appCore.presenter.ScalePresenter;
+import appCore.utils.SunmiPrintHelper;
+
+import static appCore.common.BaseAppUtil.isConnNet;
+import static appCore.common.BaseAppUtil.tipsNoNet;
 
 /*
  * Main Activity class that loads {@link MainFragment}.
@@ -72,6 +83,11 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         context = this;
         activityContext =this;
+
+        //网络检查
+//        if (!isConnNet(this)) {
+//            tipsNoNet(this);
+//        }
 
         //获得控件
         webView = (BridgeWebView) findViewById(R.id.wv_web_view);
@@ -161,67 +177,67 @@ public class MainActivity extends Activity {
 
 
         String indexUrl = Constant.MAIN_URL;
-        System.out.println("首页地址"+indexUrl);
         webView.loadUrl(indexUrl);
 
 
-
+//        initAction();
 
         getVersionInfo();
 
 
 //Activity 队列记录
-//        activityHolder = ActivityPoolManager.add(indexUrl, this);
+        activityHolder = ActivityPoolManager.add(indexUrl, this);
 
 
-//        webView.setOnKeyListener(new View.OnKeyListener() {
-//            @Override
-//            public boolean onKey(View v, int keyCode, KeyEvent event) {
-//
-//                if (event.getAction() == KeyEvent.ACTION_DOWN) {
-//                    final Map<String, Object> params = new HashMap<>();
-//                    params.put("event", "back");
-//                    params.put("canGoBack", webView.canGoBack());
+        webView.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    final Map<String, Object> params = new HashMap<>();
+                    params.put("event", "back");
+                    params.put("canGoBack", webView.canGoBack());
 //                    System.out.println("返回监听"+keyCode);
 //                    System.out.println("返回监听最后"+webView.canGoBack());
-//                    //按返回键操作并且能回退网页
-//                    if (keyCode == KeyEvent.KEYCODE_BACK && webView.canGoBack()) {
-////                        System.out.println("返回监听111");
-//                        //返回键给前端监听
-//
-//                        Handler handler = new Handler(Looper.getMainLooper());
-//                        handler.post(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                webView.loadUrl("javascript:$androidBackClick('" + params + "')");
-////                                ActivityPoolManager.exitClient();
-//                            }
-//                        });
-//
-//                        //后退
+                    //按返回键操作并且能回退网页
+                    if (keyCode == KeyEvent.KEYCODE_BACK && webView.canGoBack()) {
+//                        System.out.println("返回监听111");
+                        //返回键给前端监听
+
+                        Handler handler = new Handler(Looper.getMainLooper());
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                webView.loadUrl("javascript:$androidBackClick('" + params + "')");
+//                                ActivityPoolManager.exitClient();
+                            }
+                        });
+
+                        //后退
 //                        webView.goBack();
-//                        return true;
-//                    }else if(keyCode == KeyEvent.KEYCODE_BACK){
-//                        //返回键给前端监听
+                        return true;
+                    }else if(keyCode == KeyEvent.KEYCODE_BACK){
+                        //返回键给前端监听
 //                        System.out.println("返回监听333");
-//                        Handler handler = new Handler(Looper.getMainLooper());
-//                        handler.post(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                webView.loadUrl("javascript:$androidBackClick('" + params + "')");
-////                                ActivityPoolManager.exitClient();
-//                            }
-//                        });
-//
-//                        return true;
-//                    }
-//                }
-//                return false;
-//            }
-//        });
+                        Handler handler = new Handler(Looper.getMainLooper());
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                webView.loadUrl("javascript:$androidBackClick('" + params + "')");
+//                                ActivityPoolManager.exitClient();
+                            }
+                        });
 
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
 
+        init();
 
+        SpeechUtils.getInstance(context);
     }
 
 
@@ -260,7 +276,13 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Connect print service through interface library
+     */
+    private void init(){
+        SunmiPrintHelper.getInstance().initSunmiPrinterService(this);
+    }
 
 
 
-}
+    }

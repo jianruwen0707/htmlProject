@@ -12,10 +12,20 @@
 
 
     <!-- 以下为需要的基本权限，需要自行添加至您的AndroidManifest文件中 start-->
-    <uses-permission android:name="android.permission.INTERNET" />
-
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
+
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
@@ -28,7 +38,7 @@
 <!--    <uses-permission android:name="android.hardware.usb.accessory" />-->
 
 
-<!--    <uses-permission android:name="android.permission.USB_PERMISSION" />-->
+    <uses-permission android:name="android.permission.USB_PERMISSION" />
 
 
 
@@ -52,15 +62,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-<!--            <intent-filter>-->
-<!--                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />-->
-<!--            </intent-filter>-->
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
 
         </activity>
 
         <service android:name="net.posprinter.service.PosprinterService" />
         <activity android:name="appCore.UsbModule.UsbActivity" />
         <activity android:name="appCore.ReceiptPrinter.PrintActivity" />
+        <activity android:name="appCore.ReceiptPrinter.SunmiPrintActivity" />
+        <activity android:name=".blueTooth.BlueToothActivity" />
 
 
     </application>

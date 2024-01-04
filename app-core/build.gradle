@@ -74,7 +74,7 @@ dependencies {
         exclude group: 'com.android.support'
         exclude module: 'support-annotations:'
     }
-    implementation 'com.sunmi:printerlibrary:1.0.5'
+//    implementation 'com.sunmi:printerlibrary:1.0.5'
     //串口
     implementation 'com.github.maybesix:Android-XHLibrary:v1.0.0'
     implementation files('libs/PosPrinterSDK.jar')
@@ -82,4 +82,19 @@ dependencies {
     api 'com.facebook.fresco:fresco:0.12.0'
     api 'com.facebook.fresco:animated-gif:0.12.0'
     implementation files('libs/scale-service-part-lib.jar')
+
+    //串口检测
+    implementation 'com.github.licheedev:Android-SerialPort-API:2.0.0'
+
+//    商米打印
+    implementation files('libs/core-3.3.0.jar')
+    implementation 'com.sunmi:printerlibrary:1.0.18'
+
+
+    //弘印蓝牙
+    api 'am.util:printer:2.1.0'
+    api 'com.inuker.bluetooth:library:1.4.0'
+    api 'com.github.ybq:Android-SpinKit:1.4.0'
+    api(name: 'hoinSdk-release', ext: 'aar')
+
 }

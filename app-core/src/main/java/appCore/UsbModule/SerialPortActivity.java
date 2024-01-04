@@ -31,7 +31,7 @@ import top.maybesix.xhlibrary.serialport.SerialPortHelper;
 
 public class SerialPortActivity  extends Activity {
 
-    private byte[] mRevBuffer3 = new byte[100];
+    private byte[] mRevBuffer3 = new byte[1024];
     private byte[] mBuffer = "12345".getBytes();//{1,2,3,4,5};
     private SerialPort uart3;
     private FileOutputStream mFileOutputStream3;
@@ -46,44 +46,54 @@ public class SerialPortActivity  extends Activity {
 
     public void initAction(BridgeWebView webView) {
 
-        //获取全部串口
-        List<File> allSerial = getAllSerial();
-        Log.e("串口", "所有串口:" + allSerial);
 
-        if(allSerial==null){
-            return;
-        }
+        try {
+
+            //获取全部串口
+            List<File> allSerial = getAllSerial();
+            Log.e("串口", "所有串口:" + allSerial);
+
+            if (allSerial == null) {
+                return;
+            }
 
 
 //        mHelper = initSerialPortHelper("/dev/ttyS0");
 //        mHelper = initSerialPortHelper("/dev/ttyS1");
-
-
-
-//        if(allSerial.size()>0){
-//            String usbInfo = String.valueOf(allSerial.get(0));
-//            mHelper = initSerialPortHelper(usbInfo);
-//        }
+            //第二种使用串口的方式
+//            mHelper = initSerialPortHelper("/dev/ttyS2");
 
 //        获取可连接串口
-        for (int i = 0; i <allSerial.size(); i++) {
-            String usbInfo = String.valueOf(allSerial.get(i));
-            System.out.println("选择默认串口"+usbInfo);
-            //第二种使用串口的方式
-             mHelper = initSerialPortHelper(usbInfo);
+            for (int i = 0; i < allSerial.size(); i++) {
+                String usbInfo = String.valueOf(allSerial.get(i));
+                System.out.println("选择默认串口" + usbInfo);
 
-            System.out.println("串口状态"+mHelper);
+                if(usbInfo.equals("/dev/ttyFIQ0")||usbInfo.equals("/dev/ttyS1")||usbInfo.equals("/dev/ttyS2")){
+                    continue;
+                }
+//[/dev/ttyGS0, /dev/tty, /dev/ttyS0, /dev/ttyS1, /dev/ttyFIQ0, /dev/ttyS9]
+//                if(usbInfo.equals("")){
+//                    //第二种使用串口的方式
+//                    mHelper = initSerialPortHelper(usbInfo);
+//                }
 
-//             if(mHelper.isOpen()){
-//                 break;
-//             }
 
+                //第二种使用串口的方式
+                mHelper = initSerialPortHelper(usbInfo);
+
+
+            }
+
+
+            mwebView = webView;
+
+        }catch (Exception e){
+            e.printStackTrace();
         }
 
-
-        mwebView=webView;
-
     }
+
+
 
     /**
      * 获取所有串口
@@ -128,17 +138,44 @@ public class SerialPortActivity  extends Activity {
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
+
             if (msg.what == 1) {
                 final String data = (String) msg.obj;
                 Log.e("串口", "扫描到的串口重量" + data);
 
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mwebView.loadUrl("javascript:$getWeight('" + data + "')");
+              // 使用逗号分割字符串
+                String[] parts = data.split(" ");
+              String  tempData = "0" ;
+
+//                // 遍历分割后的子字符串数组
+                for (String part : parts) {
+
+                    if(!part.equals("")&&part.indexOf("�")==-1){
+                        tempData =part;
+                        break;
                     }
-                });
+                }
+
+                if(tempData.startsWith("0")){
+                    tempData=tempData.substring(1);
+                }
+
+//                System.out.println("实际返回重量"+tempData);
+
+
+                if(mwebView !=null&&isDouble(tempData)){
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    final String finalTempData = tempData;
+
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mwebView.loadUrl("javascript:$getWeight('" + finalTempData + "')");
+                        }
+                    });
+                }
+
+
 
 
             }
@@ -208,17 +245,24 @@ public class SerialPortActivity  extends Activity {
 
 
     private SerialPortHelper initSerialPortHelper(String port) {
-        SerialPortHelper serialPort = new SerialPortHelper(port, 9600);
-        serialPort.setSerialPortReceivedListener(new SerialPortHelper.OnSerialPortReceivedListener() {
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onSerialPortDataReceived(ComPortData comPortData) {
-                String dataStr = comPortData.getRecTime() + " 收到: " + new String(comPortData.getRecData());
-                mHandler.sendMessage(mHandler.obtainMessage(1, dataStr));
-            }
-        });
-        serialPort.open();
-        return serialPort;
+
+
+            SerialPortHelper serialPort = new SerialPortHelper(port, 9600);
+            serialPort.setSerialPortReceivedListener(new SerialPortHelper.OnSerialPortReceivedListener() {
+                @SuppressLint("SetTextI18n")
+                @Override
+                public void onSerialPortDataReceived(ComPortData comPortData) {
+//                String dataStr = comPortData.getRecTime() + " 收到: " + new String(comPortData.getRecData());
+                    String dataStr = new String(comPortData.getRecData());
+
+                    mHandler.sendMessage(mHandler.obtainMessage(1, dataStr));
+                }
+            });
+
+            serialPort.open();
+            return serialPort;
+
+
     }
 
     private void sendDataHelper() {
@@ -239,17 +283,21 @@ public class SerialPortActivity  extends Activity {
             throw new RuntimeException(e);
         }
 
-        if (mHelper != null) {
-            mHelper.close();
+//        if (mHelper != null) {
+//            mHelper.close();
+//        }
+    }
+
+
+    public static boolean isDouble(String str) {
+        try {
+            Double.parseDouble(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 
-
-
-    // 回调接口
-    interface CallBack {
-        void onResponse(String data);
-    }
 
 
 
