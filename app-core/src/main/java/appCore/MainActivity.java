@@ -85,9 +85,9 @@ public class MainActivity extends Activity {
         activityContext =this;
 
         //网络检查
-//        if (!isConnNet(this)) {
-//            tipsNoNet(this);
-//        }
+        if (!isConnNet(this)) {
+            tipsNoNet(this);
+        }
 
         //获得控件
         webView = (BridgeWebView) findViewById(R.id.wv_web_view);
